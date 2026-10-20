@@ -41,7 +41,23 @@ exports.refreshCharacters = onSchedule({
           lastUpdatedAt: FieldValue.serverTimestamp(),
           lastError: FieldValue.delete()
         }, {merge:true});
-        await doc.ref.collection("snapshots").add(snapshot);
+        const snapshots = doc.ref.collection("snapshots");
+        await snapshots.add(snapshot);
+        // XP gains compare the latest snapshot with the closest snapshot at/before each window.
+        const all = await snapshots.orderBy("fetchedAt", "asc").get();
+        const points = all.docs.map(d => d.data())
+          .filter(s => s.fetchedAt && typeof s.experience === "number")
+          .sort((a,b) => a.fetchedAt.toMillis() - b.fetchedAt.toMillis());
+        const nowMs = Date.now();
+        const gain = hours => {
+          const target = nowMs - hours * 60 * 60 * 1000;
+          const base = points.filter(p => p.fetchedAt.toMillis() <= target).pop();
+          return base ? Math.max(0, experience - base.experience) : null;
+        };
+        await doc.ref.set({
+          xpDaily: gain(24), xp7: gain(24 * 7), xp30: gain(24 * 30),
+          historySnapshots: points.length
+        }, {merge:true});
         updated++;
       } catch (e) {
         errors++;
