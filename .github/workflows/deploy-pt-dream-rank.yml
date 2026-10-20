@@ -1,0 +1,37 @@
+name: Deploy PT Dream Rank to Firebase
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pt-dream-rank/**'
+      - '.github/workflows/deploy-pt-dream-rank.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pt-dream-rank
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Functions dependencies
+        run: npm install
+        working-directory: pt-dream-rank/functions
+      - name: Configure Firebase credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT" || (echo "Missing FIREBASE_SERVICE_ACCOUNT GitHub secret" && exit 1)
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+      - name: Deploy Hosting, Functions and Firestore rules
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          test -n "$FIREBASE_PROJECT_ID" || (echo "Missing FIREBASE_PROJECT_ID GitHub secret" && exit 1)
+          npx --yes firebase-tools deploy --project "$FIREBASE_PROJECT_ID" --only hosting,functions,firestore:rules --non-interactive
