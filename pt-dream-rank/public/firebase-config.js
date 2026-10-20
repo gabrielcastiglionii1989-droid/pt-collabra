@@ -1,10 +1,10 @@
-// CONFIGURE antes de publicar: substitua pelos dados do seu app Web no Firebase Console.
-// Configuração web Firebase não é uma chave privada; NÃO inclua JSON de service account aqui.
+// Configuração do app Web PT Dream Web (Firebase).
+// Estes dados identificam o app web; não são credenciais de conta de serviço.
 export const firebaseConfig = {
-  apiKey: "PREENCHER_API_KEY",
-  authDomain: "SEU-PROJETO.firebaseapp.com",
-  projectId: "SEU-PROJETO",
-  storageBucket: "SEU-PROJETO.firebasestorage.app",
-  messagingSenderId: "PREENCHER_SENDER_ID",
-  appId: "PREENCHER_APP_ID"
+  apiKey: "AIzaSyAyYlTUn7t45hnsfJHGONdrRLaUaDCLc9No",
+  authDomain: "pt-dream-61267.firebaseapp.com",
+  projectId: "pt-dream-61267",
+  storageBucket: "pt-dream-61267.firebasestorage.app",
+  messagingSenderId: "440159697781",
+  appId: "1:440159697781:web:f58b7f279267d5c168313c"
 };
